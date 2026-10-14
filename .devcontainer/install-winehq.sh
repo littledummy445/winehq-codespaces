@@ -18,9 +18,13 @@ case "$CODENAME" in
   noble)
     REPO_FILE_URL="https://dl.winehq.org/wine-builds/ubuntu/dists/noble/winehq-noble.sources"
     ;;
+  resolute)
+    REPO_FILE_URL="https://dl.winehq.org/wine-builds/ubuntu/dists/noble/winehq-noble.sources"
+    echo "Ubuntu codename '$CODENAME' is using the WineHQ noble repository for compatibility."
+    ;;
   *)
     echo "Unsupported Ubuntu codename: ${CODENAME:-unknown}." >&2
-    echo "This script currently supports jammy and noble based Codespaces images." >&2
+    echo "This script currently supports jammy, noble, and resolute based Codespaces images." >&2
     exit 1
     ;;
 esac

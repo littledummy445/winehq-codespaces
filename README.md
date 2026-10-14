@@ -7,6 +7,7 @@ Set up WineHQ and Wine GUI tooling inside GitHub Codespaces.
 - A Codespaces-ready install script for WineHQ stable
 - GUI support dependencies for Wine apps (`xvfb`, `x11vnc`, `openbox`, `novnc`)
 - A helper launcher script to run Wine GUI configuration
+- Ubuntu codename support for `jammy`, `noble`, and `resolute` (with a compatibility fallback)
 
 ## Quick start
 
