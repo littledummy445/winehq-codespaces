@@ -33,6 +33,39 @@ bash scripts/run-winegui.sh
 bash .devcontainer/install-winehq.sh
 ```
 
+## Full terminal install script
+
+Run this full script in an Ubuntu terminal to install WineHQ stable, required Wine components, noVNC, and websockify:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+export DEBIAN_FRONTEND=noninteractive
+source /etc/os-release
+CODENAME="${VERSION_CODENAME:-}"
+
+case "$CODENAME" in
+  jammy) REPO_FILE_URL="https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources" ;;
+  noble|resolute) REPO_FILE_URL="https://dl.winehq.org/wine-builds/ubuntu/dists/noble/winehq-noble.sources" ;;
+  *)
+    echo "Unsupported Ubuntu codename: ${CODENAME:-unknown}. Supported: jammy, noble, resolute." >&2
+    exit 1
+    ;;
+esac
+
+sudo dpkg --add-architecture i386
+sudo mkdir -pm755 /etc/apt/keyrings
+sudo apt-get update
+sudo apt-get install -y ca-certificates wget gnupg
+wget -qO- https://dl.winehq.org/wine-builds/winehq.key | sudo gpg --dearmor -o /etc/apt/keyrings/winehq-archive.key
+sudo wget -qO /etc/apt/sources.list.d/winehq.sources "$REPO_FILE_URL"
+
+sudo apt-get update
+sudo apt-get install -y --install-recommends winehq-stable
+sudo apt-get install -y winetricks xvfb x11vnc openbox novnc websockify
+```
+
 ## Repository structure
 
 - `.devcontainer/devcontainer.json` - Codespaces container definition
