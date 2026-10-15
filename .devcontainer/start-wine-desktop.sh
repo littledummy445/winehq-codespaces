@@ -45,23 +45,37 @@ wget -O winegui.deb "$DEB_URL"
 sudo apt-get install -y ./winegui.deb || sudo apt-get install -f -y
 rm -f winegui.deb
 
-echo "=== 6. Configuring OpenBox Auto-launch (WineGUI & Terminal) ==="
+echo "=== 6. Configuring OpenBox Scaling & Auto-launch ==="
 mkdir -p ~/.config/openbox
+
+# Force higher DPI scaling so text and UI elements are larger and readable
+cat << 'XRES' > ~/.Xresources
+Xft.dpi: 144
+Xft.antialias: 1
+Xft.hinting: 1
+Xft.hintstyle: hintfull
+XRES
+xrdb -merge ~/.Xresources 2>/dev/null || true
+
+# Auto-launch WineGUI and a terminal inside the scaled desktop session
 cat << 'EMU' > ~/.config/openbox/autostart
-# Auto-launch WineGUI and a terminal inside the desktop session
+# Apply DPI scaling on session start
+xrdb -merge ~/.Xresources &
+# Auto-launch apps
 winegui &
 xfce4-terminal &
 EMU
 chmod +x ~/.config/openbox/autostart
 
-echo "=== 7. Launching VNC Server with OpenBox on Display :0 ==="
+echo "=== 7. Launching VNC Server with OpenBox on Display :0 (Higher Res) ==="
 vncserver -kill :0 2>/dev/null || true
 
+# Increased resolution to 1600x900 for a spacious, larger workspace
 tigervncserver :0 \
     --I-KNOW-THIS-IS-INSECURE \
     -SecurityTypes None \
     -xstartup /usr/bin/openbox \
-    -geometry 1280x800 \
+    -geometry 1600x900 \
     -localhost no
 
 echo "=== 8. Starting noVNC / websockify bridge on port 6080 ==="
@@ -69,7 +83,7 @@ pkill -f websockify || true
 websockify --web=/usr/share/novnc/ 6080 localhost:5900 &
 
 echo "====================================================="
-echo " SUCCESS! OpenBox + Chrome + XFCE Terminal + WineGUI running."
+echo " SUCCESS! Scaled OpenBox + Chrome + XFCE Terminal + WineGUI running."
 echo " Go to the 'Ports' tab in Codespaces, find port 6080,"
 echo " change visibility to Public, and click 'Open in Browser'."
 echo "====================================================="
