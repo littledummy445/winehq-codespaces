@@ -45,10 +45,9 @@ wget -O winegui.deb "$DEB_URL"
 sudo apt-get install -y ./winegui.deb || sudo apt-get install -f -y
 rm -f winegui.deb
 
-echo "=== 6. Configuring OpenBox Scaling & Auto-launch ==="
+echo "=== 6. Configuring OpenBox Scaling & Auto-launch for Desktop 1 ==="
 mkdir -p ~/.config/openbox
 
-# Force higher DPI scaling so text and UI elements are larger and readable
 cat << 'XRES' > ~/.Xresources
 Xft.dpi: 144
 Xft.antialias: 1
@@ -57,20 +56,15 @@ Xft.hintstyle: hintfull
 XRES
 xrdb -merge ~/.Xresources 2>/dev/null || true
 
-# Auto-launch WineGUI and a terminal inside the scaled desktop session
 cat << 'EMU' > ~/.config/openbox/autostart
-# Apply DPI scaling on session start
 xrdb -merge ~/.Xresources &
-# Auto-launch apps
 winegui &
 xfce4-terminal &
 EMU
 chmod +x ~/.config/openbox/autostart
 
-echo "=== 7. Launching VNC Server with OpenBox on Display :0 (Higher Res) ==="
+echo "=== 7. Launching VNC Server 1 (OpenBox / WineGUI) on Display :0 (Port 6080) ==="
 vncserver -kill :0 2>/dev/null || true
-
-# Increased resolution to 1600x900 for a spacious, larger workspace
 tigervncserver :0 \
     --I-KNOW-THIS-IS-INSECURE \
     -SecurityTypes None \
@@ -78,12 +72,36 @@ tigervncserver :0 \
     -geometry 1600x900 \
     -localhost no
 
-echo "=== 8. Starting noVNC / websockify bridge on port 6080 ==="
+echo "=== 8. Launching VNC Server 2 (Dedicated Chrome) on Display :1 (Port 6081) ==="
+vncserver -kill :1 2>/dev/null || true
+
+# Create custom startup script for the Chrome-only display session
+cat << 'CHROMESTART' > ~/.vnc/xstartup-chrome
+#!/bin/sh
+xrdb -merge ~/.Xresources
+# Launch Chrome with sandbox flags required for containerized environments
+exec google-chrome --no-sandbox --disable-dev-shm-usage --start-maximized https://www.google.com
+CHROMESTART
+chmod +x ~/.vnc/xstartup-chrome
+
+tigervncserver :1 \
+    --I-KNOW-THIS-IS-INSECURE \
+    -SecurityTypes None \
+    -xstartup ~/.vnc/xstartup-chrome \
+    -geometry 1600x900 \
+    -localhost no
+
+echo "=== 9. Starting noVNC / websockify bridges for both ports ==="
 pkill -f websockify || true
+# Bridge Port 6080 to Display :0 (OpenBox Desktop)
 websockify --web=/usr/share/novnc/ 6080 localhost:5900 &
+# Bridge Port 6081 to Display :1 (Dedicated Chrome Instance)
+websockify --web=/usr/share/novnc/ 6081 localhost:5901 &
 
 echo "====================================================="
-echo " SUCCESS! Scaled OpenBox + Chrome + XFCE Terminal + WineGUI running."
-echo " Go to the 'Ports' tab in Codespaces, find port 6080,"
-echo " change visibility to Public, and click 'Open in Browser'."
+echo " SUCCESS! Dual environments running:"
+echo " -> Desktop 1 (WineGUI + Terminal): Port 6080"
+echo " -> Desktop 2 (Dedicated Chrome):   Port 6081"
+echo " Go to the 'Ports' tab in Codespaces, make both Public,"
+echo " and open them in your browser!"
 echo "====================================================="
