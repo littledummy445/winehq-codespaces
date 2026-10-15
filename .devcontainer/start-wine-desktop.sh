@@ -75,11 +75,12 @@ tigervncserver :0 \
 echo "=== 8. Launching VNC Server 2 (Dedicated Chrome) on Display :1 (Port 6081) ==="
 vncserver -kill :1 2>/dev/null || true
 
-# Create custom startup script for the Chrome-only display session
+# Explicitly create ~/.vnc directory to prevent missing directory errors
+mkdir -p ~/.vnc
+
 cat << 'CHROMESTART' > ~/.vnc/xstartup-chrome
 #!/bin/sh
-xrdb -merge ~/.Xresources
-# Launch Chrome with sandbox flags required for containerized environments
+xrdb -merge ~/.Xresources 2>/dev/null || true
 exec google-chrome --no-sandbox --disable-dev-shm-usage --start-maximized https://www.google.com
 CHROMESTART
 chmod +x ~/.vnc/xstartup-chrome
