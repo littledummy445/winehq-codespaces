@@ -12,9 +12,10 @@ Set up WineHQ and Wine GUI tooling inside GitHub Codespaces.
 ## Quick start
 
 1. Open this repository in GitHub Codespaces.
-2. Wait for the `postCreateCommand` to complete. It runs:
+2. Link to GitHub Codespaces (Open)[codespaces.new]
+3. Wait for the `postCreateCommand` to complete. It runs:
    - `.devcontainer/install-winehq.sh`
-3. Verify the installation:
+4. Verify the installation:
 
 ```bash
 wine --version
